@@ -1,27 +1,10 @@
-import { encrypt } from "../crypto.js";
+import { encrypt } from "./crypto.js";
 import { GuardianInfo, StudentInfo, UserType } from "../types.js";
 import { dbQuery } from "../functions.js";
 
-function IDfy(info: object) {
-    let ids = "";
-    for (const key of Object.keys(info)) {
-        const value = info[key];
-        if (value !== null && value !== undefined) {
-            ids += key + ", ";
-        }
-    }
-    return ids;
-}
-function valueify(info: object) {
-    let values = "";
-    for (const key of Object.keys(info)) {
-        let value = info[key];
-        if (value !== null && value !== undefined) {
-            value = encrypt(value);
-            values += typeof value === "number" ? value + ", " : `'${value}', `;
-        }
-    }
-    return values;
+export async function insertOrganisation()
+{
+
 }
 
 export async function insertUser(type: UserType, password: string) {

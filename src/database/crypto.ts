@@ -1,4 +1,6 @@
 import {configDotenv} from "dotenv";
+import {v4 as uuidv4} from "uuid";
+
 configDotenv()
 const key = Buffer.from(process.env.ENCRYPTKEY, "latin1");
 const iv = Buffer.from(process.env.ENCRYPTIV, "latin1");
@@ -18,4 +20,9 @@ export function decrypt(string: string): string {
         decipher.update(string.toString(), "hex", "utf-8") +
         decipher.final("utf8")
     );
+}
+
+export function genUUID()
+{
+    return uuidv4();
 }

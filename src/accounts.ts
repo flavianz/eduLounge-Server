@@ -2,12 +2,7 @@ import { Student } from "./types.js";
 import { Response } from "./types.js";
 import { getError } from "./functions.js";
 import {
-    deleteGuardian,
-    deleteStudent,
-    deleteUser,
-    insertGuardian,
-    insertStudent,
-    insertUser,
+
 } from "./database/queries.js";
 
 export async function createStudent(
