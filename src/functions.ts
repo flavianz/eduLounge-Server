@@ -8,16 +8,6 @@ export async function dbQuery(query: string, values: string[]): Promise<Response
     });
 }
 
-function getRandomString(): string {
-    let result = "";
-    const chars =
-        "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    for (let i = 0; i < 32; i++) {
-        result += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return result;
-}
-
 export function getError(code: ErrorCode, additional?: string): ErrorType {
     let message = "";
     if (additional !== undefined) {

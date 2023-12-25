@@ -4,7 +4,7 @@ import { dbQuery } from "../functions.js";
 
 export async function insertOrganisation()
 {
-
+    const response = await dbQuery()
 }
 
 export async function insertUser(type: UserType, password: string) {
