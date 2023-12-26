@@ -1,28 +1,39 @@
 import {configDotenv} from "dotenv";
-import {v4 as uuidv4} from "uuid";
+import {v4 as UUIDv4} from "uuid";
 
 configDotenv()
-const key = Buffer.from(process.env.ENCRYPTKEY, "latin1");
-const iv = Buffer.from(process.env.ENCRYPTIV, "latin1");
-import { createCipheriv, createDecipheriv } from "crypto";
+const key = process.env.ENCRYPTKEY
+const iv = process.env.ENCRYPTIV
+import crypto from "node:crypto";
 
-
+/**Get the string encrypted using the AES 256 CBC algorithm
+ * @param {string} string the to be encrypted string
+ * @returns {string} the encrypted string
+ * */
 export function encrypt(string: string): string {
-    const cipher = createCipheriv("aes256", key, iv);
-    return (
-        cipher.update(string.toString(), "utf8", "hex") + cipher.final("hex")
-    );
+    const cipher = crypto.createCipheriv("aes-256-cbc", key, iv)
+    return Buffer.from(
+        cipher.update(string, 'utf8', 'hex') + cipher.final('hex')
+    ).toString('base64')
 }
 
+/**Get the string decrypted using the AES 256 CBC algorithm
+ * @param {string} string the to be decrypted string
+ * @returns {string} the decrypted string
+ * */
 export function decrypt(string: string): string {
-    const decipher = createDecipheriv("aes256", key, iv);
+    const buff = Buffer.from(string, 'base64')
+    const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv)
     return (
-        decipher.update(string.toString(), "hex", "utf-8") +
-        decipher.final("utf8")
-    );
+        decipher.update(buff.toString('utf8'), 'hex', 'utf8') +
+        decipher.final('utf8')
+    )
 }
 
-export function genUUID()
+/**Get a semi-randomly generated uuid
+ * @returns {string} the generated uuid
+ * */
+export function generateUUID(): string
 {
-    return uuidv4();
+    return UUIDv4();
 }

@@ -1,20 +1,12 @@
-import { ErrorCode, ErrorType, Response } from "./types.js";
-import { ErrorCodes } from "./constants.js";
-import client from "./database/postgres.js";
-
-export async function dbQuery(query: string, values: string[]): Promise<Response> {
-    return await new Promise((resolve) => {
-        return  client.query(query, values)
-    });
-}
-
-export function getError(code: ErrorCode, additional?: string): ErrorType {
-    let message = "";
-    if (additional !== undefined) {
-        message = ": " + additional;
+/** Generate a random string using the characters a-z, A-Z and 0-9
+ * @param {number} length the length of the generated string, default 32
+ * @returns {string} the generated string
+ * */
+function getRandomString(length: number = 32): string {
+    let result = "";
+    const chars: string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    for (let i = 0; i < length; i++) {
+        result += chars[Math.floor(Math.random() * chars.length)];
     }
-    return {
-        code: code,
-        message: ErrorCodes[code] + message,
-    };
+    return result;
 }
