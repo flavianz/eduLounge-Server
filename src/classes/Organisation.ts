@@ -1,5 +1,6 @@
 import {dbQuery} from "../database/postgres.js";
 import {decrypt, encrypt, generateUUID} from "../database/crypto.js";
+import {School} from "./School.js";
 
 export class Organisation {
     readonly uuid: string
@@ -90,6 +91,21 @@ export class Organisation {
         }catch (e)
         {
             throw new Error("Failed to delete organisation '" + this.uuid + "' from database", {cause: e})
+        }
+    }
+    /** Create a school belonging to this organisation in database
+     * @param {string} short the short id for the school
+     * @param {string} name the name for the school
+     * @returns {School}, the created school instance
+     * */
+    async createBelongingSchool(short: string, name: string): Promise<School>
+    {
+        try {
+            const uuid = generateUUID();
+            await dbQuery("INSERT INTO edulounge.schools (school_id, short, name, organisation_id) VALUES ($1, $2, $3, $4)", [uuid, encrypt(short), encrypt(name), this.uuid]);
+            return new School(uuid)
+        }catch (e) {
+            throw new Error("Failed to create school belonging to organisation '" + this.uuid + "' in database", {cause: e})
         }
     }
     /**Get the uuid of the organisation
