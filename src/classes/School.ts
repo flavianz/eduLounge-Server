@@ -18,7 +18,7 @@ export class School {
     {
         try {
             const uuid = generateUUID();
-            await dbQuery("INSERT INTO edulounge.schools (school_id, short, name, organisation_id) VALUES ($1, $2, $3, $4)", [uuid, encrypt(short), encrypt(name), organisationID]);
+            await dbQuery("INSERT INTO accounts.schools (school_id, short, name, organisation_id) VALUES ($1, $2, $3, $4)", [uuid, encrypt(short), encrypt(name), organisationID]);
             return new School(uuid)
         }catch (e) {
             throw new Error("Failed to create school in database", {cause: e})
@@ -32,7 +32,7 @@ export class School {
     {
         try
         {
-            const result = await dbQuery("SELECT short FROM edulounge.schools WHERE school_id=$1", [this.uuid])
+            const result = await dbQuery("SELECT short FROM accounts.schools WHERE school_id=$1", [this.uuid])
             //Check for empty result
             if(result.rows.length === 0)
             {
@@ -50,7 +50,7 @@ export class School {
     async setShort(short: string)
     {
         try {
-            await dbQuery("UPDATE edulounge.schools SET short=$1 WHERE school_id=$2", [encrypt(short), this.uuid])
+            await dbQuery("UPDATE accounts.schools SET short=$1 WHERE school_id=$2", [encrypt(short), this.uuid])
         } catch (e) {
             throw new Error("Failed to update short of school '" + this.uuid + "' in database", {cause: e})
         }
@@ -61,7 +61,7 @@ export class School {
     async getName(): Promise<string | null> {
         try
         {
-            const result = await dbQuery("SELECT name FROM edulounge.schools WHERE school_id=$1", [this.uuid])
+            const result = await dbQuery("SELECT name FROM accounts.schools WHERE school_id=$1", [this.uuid])
             //Check for empty result
             if(result.rows.length === 0)
             {
@@ -79,7 +79,7 @@ export class School {
     async setName(name: string)
     {
         try {
-            await dbQuery("UPDATE edulounge.schools SET name=$1 WHERE school_id=$2", [encrypt(name), this.uuid])
+            await dbQuery("UPDATE accounts.schools SET name=$1 WHERE school_id=$2", [encrypt(name), this.uuid])
         } catch (e) {
             throw new Error("Failed to update name of school '" + this.uuid + "' in database", {cause: e})
         }
@@ -89,7 +89,7 @@ export class School {
     async delete()
     {
         try {
-            await dbQuery("DELETE FROM edulounge.schools WHERE school_id=$1", [this.uuid])
+            await dbQuery("DELETE FROM accounts.schools WHERE school_id=$1", [this.uuid])
         }catch (e)
         {
             throw new Error("Failed to delete school '" + this.uuid + "' from database", {cause: e})

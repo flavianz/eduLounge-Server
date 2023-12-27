@@ -16,7 +16,7 @@ export class Organisation {
     {
         try {
             const uuid = generateUUID();
-            await dbQuery("INSERT INTO edulounge.organisations (organisation_id, short, name) VALUES ($1, $2, $3)", [uuid, encrypt(short), encrypt(name)]);
+            await dbQuery("INSERT INTO accounts.organisations (organisation_id, short, name) VALUES ($1, $2, $3)", [uuid, encrypt(short), encrypt(name)]);
             return new Organisation(uuid)
         }catch (e) {
             throw new Error("Failed to create organisation in database", {cause: e})
@@ -30,7 +30,7 @@ export class Organisation {
     {
         try
         {
-            const result = await dbQuery("SELECT short FROM edulounge.organisations WHERE organisation_id=$1", [this.uuid])
+            const result = await dbQuery("SELECT short FROM accounts.organisations WHERE organisation_id=$1", [this.uuid])
             //Check for empty result
             if(result.rows.length === 0)
             {
@@ -48,7 +48,7 @@ export class Organisation {
     async setShort(short: string)
     {
         try {
-            await dbQuery("UPDATE edulounge.organisations SET short=$1 WHERE organisation_id=$2", [encrypt(short), this.uuid])
+            await dbQuery("UPDATE accounts.organisations SET short=$1 WHERE organisation_id=$2", [encrypt(short), this.uuid])
         } catch (e) {
             throw new Error("Failed to update short of organisation '" + this.uuid + "' in database", {cause: e})
         }
@@ -59,7 +59,7 @@ export class Organisation {
     async getName(): Promise<string | null> {
         try
         {
-            const result = await dbQuery("SELECT name FROM edulounge.organisations WHERE organisation_id=$1", [this.uuid])
+            const result = await dbQuery("SELECT name FROM accounts.organisations WHERE organisation_id=$1", [this.uuid])
             //Check for empty result
             if(result.rows.length === 0)
             {
@@ -77,7 +77,7 @@ export class Organisation {
     async setName(name: string)
     {
         try {
-            await dbQuery("UPDATE edulounge.organisations SET name=$1 WHERE organisation_id=$2", [encrypt(name), this.uuid])
+            await dbQuery("UPDATE accounts.organisations SET name=$1 WHERE organisation_id=$2", [encrypt(name), this.uuid])
         } catch (e) {
             throw new Error("Failed to update name of organisation '" + this.uuid + "' in database", {cause: e})
         }
@@ -87,7 +87,7 @@ export class Organisation {
     async delete()
     {
         try {
-            await dbQuery("DELETE FROM edulounge.organisations WHERE organisation_id=$1", [this.uuid])
+            await dbQuery("DELETE FROM accounts.organisations WHERE organisation_id=$1", [this.uuid])
         }catch (e)
         {
             throw new Error("Failed to delete organisation '" + this.uuid + "' from database", {cause: e})
@@ -102,7 +102,7 @@ export class Organisation {
     {
         try {
             const uuid = generateUUID();
-            await dbQuery("INSERT INTO edulounge.schools (school_id, short, name, organisation_id) VALUES ($1, $2, $3, $4)", [uuid, encrypt(short), encrypt(name), this.uuid]);
+            await dbQuery("INSERT INTO accounts.schools (school_id, short, name, organisation_id) VALUES ($1, $2, $3, $4)", [uuid, encrypt(short), encrypt(name), this.uuid]);
             return new School(uuid)
         }catch (e) {
             throw new Error("Failed to create school belonging to organisation '" + this.uuid + "' in database", {cause: e})
