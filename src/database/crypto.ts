@@ -4,7 +4,7 @@ import {v4 as UUIDv4} from "uuid";
 configDotenv()
 const key = process.env.ENCRYPTKEY
 const iv = process.env.ENCRYPTIV
-import crypto from "node:crypto";
+import crypto, {createHash} from "node:crypto";
 
 /**Get the string encrypted using the AES 256 CBC algorithm
  * @param {string} string the to be encrypted string
@@ -28,6 +28,14 @@ export function decrypt(string: string): string {
         decipher.update(buff.toString('utf8'), 'hex', 'utf8') +
         decipher.final('utf8')
     )
+}
+
+/**Get a hashed version of the provided string, used for passwords
+ * @param {string} string the string to be hashed
+ * @returns {string} the created hash
+ * */
+function hash(string: string): string {
+    return createHash('sha3-256').update(string).digest('hex')
 }
 
 /**Get a semi-randomly generated uuid
