@@ -34,7 +34,7 @@ export function decrypt(string: string): string {
  * @param {string} string the string to be hashed
  * @returns {string} the created hash
  * */
-function hash(string: string): string {
+export function hash(string: string): string {
     return createHash('sha3-256').update(string).digest('hex')
 }
 
