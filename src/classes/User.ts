@@ -68,4 +68,22 @@ export class User{
         }
 
     }
+    /** Delete the user from the database
+     * */
+    async delete()
+    {
+        try {
+            await dbQuery("DELETE FROM accounts.users WHERE user_id=$1", [this.uuid])
+        }catch (e)
+        {
+            throw new Error("Failed to delete user '" + this.uuid + "' from database", {cause: e})
+        }
+    }
+    /**Get the uuid of the user
+     * @returns {string} the uuid of the user
+     * */
+    getUUID(): string
+    {
+        return this.uuid;
+    }
 }
