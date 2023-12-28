@@ -1,25 +1,33 @@
-import {generateUUID, hash} from "../database/crypto.js";
+import {encrypt, generateUUID, hash} from "../database/crypto.js";
 import {dbQuery} from "../database/postgres.js";
+import {PersonalInfo} from "../types.js";
+import {encryptObject} from "../functions.js";
 
-export class User {
+export class User{
     readonly uuid: string;
 
     constructor(uuid: string) {
         this.uuid = uuid;
     }
-
-    static async createUser(password: string)
+    /**Create a new user in the database
+     * @param {string} password the password for the user
+     * @param {PersonalInfo} personalInfo the personal info for the user
+     * @returns {User}, the created user class instance
+     * */
+    static async createUser(password: string, personalInfo: PersonalInfo): Promise<User>
     {
         try {
             const uuid = generateUUID();
-            await dbQuery("INSERT INTO accounts.users (user_id, password) VALUES ($1, $2)", [uuid, hash(password)]);
+            await dbQuery("INSERT INTO accounts.users (user_id, password, personal_info) VALUES ($1, $2, json_populate_record(null::accounts.personal_info, $3))", [uuid, hash(password), JSON.stringify(encryptObject(personalInfo))]);
             return new User(uuid)
         }catch (e) {
             throw new Error("Failed to create user in database", {cause: e})
         }
     }
-
-    async getPassword()
+    /**Get the hashed password of the user
+     * @returns {string} the hashed password
+     * */
+    async getPassword(): Promise<string>
     {
         try
         {
@@ -35,7 +43,9 @@ export class User {
             throw new Error("Failed to get short of organisation '" + this.uuid + "' in database", {cause: e})
         }
     }
-
+    /**Set the password of the user
+     * @param {string} password the to be set password
+     * */
     async setPassword(password: string)
     {
         try {
@@ -45,12 +55,17 @@ export class User {
         }
     }
 
-    async isPassword(password: string)
+    /**Check if the given password matches the users' password
+     * @param {string} password the to be checked password
+     * @returns {boolean} if the passwords match
+     * */
+    async isPassword(password: string): Promise<boolean>
     {
         try {
             return hash(password) === await this.getPassword();
         }catch (e) {
             throw new Error("Failed to compare the passwords", {cause: e})
         }
+
     }
 }
