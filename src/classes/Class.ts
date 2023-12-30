@@ -12,7 +12,7 @@ export class Class {
     /**Create a new class in the database
      * @returns {Class}, the created class instance
      * */
-    static async createUser(): Promise<Class>
+    static async createClass(): Promise<Class>
     {
         try {
             const uuid = generateUUID();
