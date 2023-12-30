@@ -1,7 +1,5 @@
-import {PersonalInfo} from "../types.js";
-import {generateUUID, hash} from "../database/crypto.js";
+import {generateUUID} from "../database/crypto.js";
 import {dbQuery} from "../database/postgres.js";
-import {encryptObject} from "../functions.js";
 
 export class Class {
     readonly uuid: string;
