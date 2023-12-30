@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 15.5
--- Dumped by pg_dump version 16.1
+-- Dumped from database version 16.0
+-- Dumped by pg_dump version 16.0
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -16,652 +16,269 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+ALTER TABLE ONLY accounts.teachers DROP CONSTRAINT teachers_schools_school_id_fk;
+ALTER TABLE ONLY accounts.schools DROP CONSTRAINT schools_organisations_organisation_id_fk;
+ALTER TABLE ONLY accounts.users DROP CONSTRAINT users_pk;
+ALTER TABLE ONLY accounts.teachers DROP CONSTRAINT teachers_pk;
+ALTER TABLE ONLY accounts.schools DROP CONSTRAINT schools_pk;
+ALTER TABLE ONLY accounts.organisations DROP CONSTRAINT organisations_pk;
+ALTER TABLE ONLY accounts.main_classes DROP CONSTRAINT main_classes_pk;
+ALTER TABLE ONLY accounts.classes DROP CONSTRAINT classes_pk;
+DROP TABLE accounts.teachers;
+DROP TABLE accounts.users;
+DROP TABLE accounts.schools;
+DROP TABLE accounts.organisations;
+DROP TABLE accounts.main_classes;
+DROP TABLE accounts.classes;
+DROP TYPE accounts.personal_info;
+DROP TYPE accounts.contact;
+DROP TYPE accounts.address;
+DROP SCHEMA accounts;
 --
--- Name: userdata; Type: SCHEMA; Schema: -; Owner: flavianzullig
+-- Name: accounts; Type: SCHEMA; Schema: -; Owner: postgres
 --
 
-CREATE SCHEMA userdata;
+CREATE SCHEMA accounts;
 
 
-ALTER SCHEMA userdata OWNER TO flavianzullig;
+ALTER SCHEMA accounts OWNER TO postgres;
+
+--
+-- Name: address; Type: TYPE; Schema: accounts; Owner: postgres
+--
+
+CREATE TYPE accounts.address AS (
+	street text,
+	number text,
+	city text,
+	postal_code text,
+	country text
+);
+
+
+ALTER TYPE accounts.address OWNER TO postgres;
+
+--
+-- Name: contact; Type: TYPE; Schema: accounts; Owner: postgres
+--
+
+CREATE TYPE accounts.contact AS (
+	cellular text,
+	landline text,
+	email text
+);
+
+
+ALTER TYPE accounts.contact OWNER TO postgres;
+
+--
+-- Name: personal_info; Type: TYPE; Schema: accounts; Owner: postgres
+--
+
+CREATE TYPE accounts.personal_info AS (
+	first_name text,
+	middle_name text,
+	last_name text,
+	address accounts.address,
+	contact accounts.contact,
+	birth_date text
+);
+
+
+ALTER TYPE accounts.personal_info OWNER TO postgres;
 
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: classes; Type: TABLE; Schema: userdata; Owner: flavianzullig
+-- Name: classes; Type: TABLE; Schema: accounts; Owner: postgres
 --
 
-CREATE TABLE userdata.classes (
-    class_id integer NOT NULL,
-    grade character varying(255),
-    school_id integer
+CREATE TABLE accounts.classes (
+    class_id uuid NOT NULL
 );
 
 
-ALTER TABLE userdata.classes OWNER TO flavianzullig;
+ALTER TABLE accounts.classes OWNER TO postgres;
 
 --
--- Name: classes_class_id_seq; Type: SEQUENCE; Schema: userdata; Owner: flavianzullig
+-- Name: main_classes; Type: TABLE; Schema: accounts; Owner: postgres
 --
 
-CREATE SEQUENCE userdata.classes_class_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE userdata.classes_class_id_seq OWNER TO flavianzullig;
-
---
--- Name: classes_class_id_seq; Type: SEQUENCE OWNED BY; Schema: userdata; Owner: flavianzullig
---
-
-ALTER SEQUENCE userdata.classes_class_id_seq OWNED BY userdata.classes.class_id;
-
-
---
--- Name: grades; Type: TABLE; Schema: userdata; Owner: flavianzullig
---
-
-CREATE TABLE userdata.grades (
-    grade_id integer NOT NULL,
-    note character varying(255) NOT NULL,
-    title character varying(255) NOT NULL,
-    student_id integer,
-    subject_id integer
-);
-
-
-ALTER TABLE userdata.grades OWNER TO flavianzullig;
-
---
--- Name: grades_grade_id_seq; Type: SEQUENCE; Schema: userdata; Owner: flavianzullig
---
-
-CREATE SEQUENCE userdata.grades_grade_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE userdata.grades_grade_id_seq OWNER TO flavianzullig;
-
---
--- Name: grades_grade_id_seq; Type: SEQUENCE OWNED BY; Schema: userdata; Owner: flavianzullig
---
-
-ALTER SEQUENCE userdata.grades_grade_id_seq OWNED BY userdata.grades.grade_id;
-
-
---
--- Name: guardians; Type: TABLE; Schema: userdata; Owner: flavianzullig
---
-
-CREATE TABLE userdata.guardians (
-    guardian_id integer NOT NULL,
-    guardian_number numeric NOT NULL,
-    first_name character varying(255),
-    middle_name character varying(255),
-    last_name character varying(255),
-    mobile character varying(255),
-    email character varying(255),
-    student_id integer
-);
-
-
-ALTER TABLE userdata.guardians OWNER TO flavianzullig;
-
---
--- Name: guardians_guardian_id_seq; Type: SEQUENCE; Schema: userdata; Owner: flavianzullig
---
-
-CREATE SEQUENCE userdata.guardians_guardian_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE userdata.guardians_guardian_id_seq OWNER TO flavianzullig;
-
---
--- Name: guardians_guardian_id_seq; Type: SEQUENCE OWNED BY; Schema: userdata; Owner: flavianzullig
---
-
-ALTER SEQUENCE userdata.guardians_guardian_id_seq OWNED BY userdata.guardians.guardian_id;
-
-
---
--- Name: organisations; Type: TABLE; Schema: userdata; Owner: flavianzullig
---
-
-CREATE TABLE userdata.organisations (
-    organisation_id integer NOT NULL,
-    short character varying(255) NOT NULL,
-    name character varying(255) NOT NULL
-);
-
-
-ALTER TABLE userdata.organisations OWNER TO flavianzullig;
-
---
--- Name: organisations_organisation_id_seq; Type: SEQUENCE; Schema: userdata; Owner: flavianzullig
---
-
-CREATE SEQUENCE userdata.organisations_organisation_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE userdata.organisations_organisation_id_seq OWNER TO flavianzullig;
-
---
--- Name: organisations_organisation_id_seq; Type: SEQUENCE OWNED BY; Schema: userdata; Owner: flavianzullig
---
-
-ALTER SEQUENCE userdata.organisations_organisation_id_seq OWNED BY userdata.organisations.organisation_id;
-
-
---
--- Name: schools; Type: TABLE; Schema: userdata; Owner: flavianzullig
---
-
-CREATE TABLE userdata.schools (
-    school_id integer NOT NULL,
-    short character varying(255) NOT NULL,
-    name character varying(255) NOT NULL,
-    organisation_id integer
-);
-
-
-ALTER TABLE userdata.schools OWNER TO flavianzullig;
-
---
--- Name: schools_school_id_seq; Type: SEQUENCE; Schema: userdata; Owner: flavianzullig
---
-
-CREATE SEQUENCE userdata.schools_school_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE userdata.schools_school_id_seq OWNER TO flavianzullig;
-
---
--- Name: schools_school_id_seq; Type: SEQUENCE OWNED BY; Schema: userdata; Owner: flavianzullig
---
-
-ALTER SEQUENCE userdata.schools_school_id_seq OWNED BY userdata.schools.school_id;
-
-
---
--- Name: users; Type: TABLE; Schema: userdata; Owner: flavianzullig
---
-
-CREATE TABLE userdata.users (
-    user_id integer NOT NULL,
-    password integer
-);
-
-
-ALTER TABLE userdata.users OWNER TO flavianzullig;
-
---
--- Name: students; Type: TABLE; Schema: userdata; Owner: flavianzullig
---
-
-CREATE TABLE userdata.students (
-    student_id integer NOT NULL,
-    first_name character varying(255),
-    middle_name character varying(255),
-    last_name character varying(255),
-    class_id integer NOT NULL
+CREATE TABLE accounts.main_classes (
 )
-INHERITS (userdata.users);
+INHERITS (accounts.classes);
 
 
-ALTER TABLE userdata.students OWNER TO flavianzullig;
-
---
--- Name: students_id_seq; Type: SEQUENCE; Schema: userdata; Owner: flavianzullig
---
-
-CREATE SEQUENCE userdata.students_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE userdata.students_id_seq OWNER TO flavianzullig;
+ALTER TABLE accounts.main_classes OWNER TO postgres;
 
 --
--- Name: students_id_seq; Type: SEQUENCE OWNED BY; Schema: userdata; Owner: flavianzullig
+-- Name: organisations; Type: TABLE; Schema: accounts; Owner: postgres
 --
 
-ALTER SEQUENCE userdata.students_id_seq OWNED BY userdata.students.student_id;
-
-
---
--- Name: subjects; Type: TABLE; Schema: userdata; Owner: flavianzullig
---
-
-CREATE TABLE userdata.subjects (
-    subject_id integer NOT NULL,
-    short character varying(255) NOT NULL,
-    name character varying(255) NOT NULL
+CREATE TABLE accounts.organisations (
+    organisation_id uuid NOT NULL,
+    short text NOT NULL,
+    name text
 );
 
 
-ALTER TABLE userdata.subjects OWNER TO flavianzullig;
+ALTER TABLE accounts.organisations OWNER TO postgres;
 
 --
--- Name: subjects_subject_id_seq; Type: SEQUENCE; Schema: userdata; Owner: flavianzullig
+-- Name: schools; Type: TABLE; Schema: accounts; Owner: postgres
 --
 
-CREATE SEQUENCE userdata.subjects_subject_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+CREATE TABLE accounts.schools (
+    school_id uuid NOT NULL,
+    short text NOT NULL,
+    name text,
+    organisation_id uuid NOT NULL
+);
 
 
-ALTER SEQUENCE userdata.subjects_subject_id_seq OWNER TO flavianzullig;
-
---
--- Name: subjects_subject_id_seq; Type: SEQUENCE OWNED BY; Schema: userdata; Owner: flavianzullig
---
-
-ALTER SEQUENCE userdata.subjects_subject_id_seq OWNED BY userdata.subjects.subject_id;
-
+ALTER TABLE accounts.schools OWNER TO postgres;
 
 --
--- Name: teachers; Type: TABLE; Schema: userdata; Owner: flavianzullig
+-- Name: users; Type: TABLE; Schema: accounts; Owner: postgres
 --
 
-CREATE TABLE userdata.teachers (
-    teacher_id integer NOT NULL,
-    first_name character varying(255),
-    middle_name character varying(255),
-    last_name character varying(255),
-    school_id integer
+CREATE TABLE accounts.users (
+    user_id uuid NOT NULL,
+    password text NOT NULL,
+    personal_info accounts.personal_info
+);
+
+
+ALTER TABLE accounts.users OWNER TO postgres;
+
+--
+-- Name: teachers; Type: TABLE; Schema: accounts; Owner: postgres
+--
+
+CREATE TABLE accounts.teachers (
+    school_id uuid NOT NULL
 )
-INHERITS (userdata.users);
+INHERITS (accounts.users);
 
 
-ALTER TABLE userdata.teachers OWNER TO flavianzullig;
-
---
--- Name: teacher_teacher_id_seq; Type: SEQUENCE; Schema: userdata; Owner: flavianzullig
---
-
-CREATE SEQUENCE userdata.teacher_teacher_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE userdata.teacher_teacher_id_seq OWNER TO flavianzullig;
+ALTER TABLE accounts.teachers OWNER TO postgres;
 
 --
--- Name: teacher_teacher_id_seq; Type: SEQUENCE OWNED BY; Schema: userdata; Owner: flavianzullig
+-- Data for Name: classes; Type: TABLE DATA; Schema: accounts; Owner: postgres
 --
 
-ALTER SEQUENCE userdata.teacher_teacher_id_seq OWNED BY userdata.teachers.teacher_id;
-
-
---
--- Name: teachers_subjects; Type: TABLE; Schema: userdata; Owner: flavianzullig
---
-
-CREATE TABLE userdata.teachers_subjects (
-    teacher_id integer NOT NULL,
-    subject_id integer NOT NULL
-);
-
-
-ALTER TABLE userdata.teachers_subjects OWNER TO flavianzullig;
-
---
--- Name: users_user_id_seq; Type: SEQUENCE; Schema: userdata; Owner: flavianzullig
---
-
-CREATE SEQUENCE userdata.users_user_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE userdata.users_user_id_seq OWNER TO flavianzullig;
-
---
--- Name: users_user_id_seq; Type: SEQUENCE OWNED BY; Schema: userdata; Owner: flavianzullig
---
-
-ALTER SEQUENCE userdata.users_user_id_seq OWNED BY userdata.users.user_id;
-
-
---
--- Data for Name: classes; Type: TABLE DATA; Schema: userdata; Owner: flavianzullig
---
-
-COPY userdata.classes (class_id, grade, school_id) FROM stdin;
+COPY accounts.classes (class_id) FROM stdin;
 \.
 
 
 --
--- Data for Name: grades; Type: TABLE DATA; Schema: userdata; Owner: flavianzullig
+-- Data for Name: main_classes; Type: TABLE DATA; Schema: accounts; Owner: postgres
 --
 
-COPY userdata.grades (grade_id, note, title, student_id, subject_id) FROM stdin;
+COPY accounts.main_classes (class_id) FROM stdin;
 \.
 
 
 --
--- Data for Name: guardians; Type: TABLE DATA; Schema: userdata; Owner: flavianzullig
+-- Data for Name: organisations; Type: TABLE DATA; Schema: accounts; Owner: postgres
 --
 
-COPY userdata.guardians (guardian_id, guardian_number, first_name, middle_name, last_name, mobile, email, student_id) FROM stdin;
+COPY accounts.organisations (organisation_id, short, name) FROM stdin;
+65964b2e-fae4-4ed9-8a19-a160707af8a0	MjE0MzE0NTFkNDg2YzU1MDc4MDFmZWFlZDQ3MDdiN2U=	M2I1NDFmZDY2OGI2YWYzN2Q4OTcyNjM4ZjdmYWRhNTU=
 \.
 
 
 --
--- Data for Name: organisations; Type: TABLE DATA; Schema: userdata; Owner: flavianzullig
+-- Data for Name: schools; Type: TABLE DATA; Schema: accounts; Owner: postgres
 --
 
-COPY userdata.organisations (organisation_id, short, name) FROM stdin;
+COPY accounts.schools (school_id, short, name, organisation_id) FROM stdin;
+696f586a-7a73-473d-a95f-bb9ae5ae1d9c	MzE4MTk5ODNkMGVkNDNiYTIwNzRlZmNkZTQ1YTliNGY=	ZDk3MDA1ZjNjMGIzMmNjMGRlMDRlOWJmZGIzZmEzNGZlY2U4NTdkMWJkYmZkOTEyNjNmZTczYjI4ZDU0NWEwNA==	65964b2e-fae4-4ed9-8a19-a160707af8a0
 \.
 
 
 --
--- Data for Name: schools; Type: TABLE DATA; Schema: userdata; Owner: flavianzullig
+-- Data for Name: teachers; Type: TABLE DATA; Schema: accounts; Owner: postgres
 --
 
-COPY userdata.schools (school_id, short, name, organisation_id) FROM stdin;
+COPY accounts.teachers (user_id, password, school_id, personal_info) FROM stdin;
+07a1ab9a-3cdd-4c10-bd24-102afaf1ae90	pw2	696f586a-7a73-473d-a95f-bb9ae5ae1d9c	\N
 \.
 
 
 --
--- Data for Name: students; Type: TABLE DATA; Schema: userdata; Owner: flavianzullig
+-- Data for Name: users; Type: TABLE DATA; Schema: accounts; Owner: postgres
 --
 
-COPY userdata.students (user_id, password, student_id, first_name, middle_name, last_name, class_id) FROM stdin;
+COPY accounts.users (user_id, password, personal_info) FROM stdin;
+4c25a380-a300-44b7-acff-5b0865f5f4d9	fd5a71a5fecae3102bf192afa6e4c07566bd8f41fbc6934cc20fd12e5595e121	(NGY0NjJjYjk1ODQxMzU4NGRlMTQ1MTY0ZTA2ZmRjMGE=,OWVlNWQxY2Q0NGFmOTVkNWI4YjkxNTk1NzNmZjdhODQ=,Yzc4Y2ZhYjhhZjhmNGZhYmNlNDgwMTBiNWQ5YWY1Njc=,"(NWYwMzc4YzUxNmI1Y2U2ODE5ZDdiYTMxZDMwNmYyOTM=,ZTY5NjRlZmNlMzY5OTA5ZmE3NDJjNTZjZjlmYzFhOGM=,NjgyODczNzg0YjJjY2IwYjhiZmE3ZjMwYTAwZWFjMTE=,MmExYzY0NDZlM2NjMTdjMWY1YWVkY2MxOGNjZTBlZmQ=,MmRmZTlhZmM0ZTAyMGNiYTJhN2Y1OWNlYzA1ZDcyMzk=)","(OTIyZDc2ZWMwOTNlMGQ1MTM1ZTIxMGQxZjI0OTUxY2U=,ZGYwZGYyODE1OTVjZDBjMzgwYzE5NjdlZjI4ZWZmNmQ=,MjYzOWJiMzk0Yzk1NzVlNzA2ODYyYzdiMTQ5ZmE3OWE0ODFlYTAzY2I4MTAwMGJmMGI2MzkyZDk4M2RjNzMxNg==)",NzE3OGIwNTIyNGZiN2YxMmVlYjE0OGExZjNhNzYxY2U=)
 \.
 
 
 --
--- Data for Name: subjects; Type: TABLE DATA; Schema: userdata; Owner: flavianzullig
+-- Name: classes classes_pk; Type: CONSTRAINT; Schema: accounts; Owner: postgres
 --
 
-COPY userdata.subjects (subject_id, short, name) FROM stdin;
-\.
-
-
---
--- Data for Name: teachers; Type: TABLE DATA; Schema: userdata; Owner: flavianzullig
---
-
-COPY userdata.teachers (user_id, password, teacher_id, first_name, middle_name, last_name, school_id) FROM stdin;
-\.
+ALTER TABLE ONLY accounts.classes
+    ADD CONSTRAINT classes_pk PRIMARY KEY (class_id);
 
 
 --
--- Data for Name: teachers_subjects; Type: TABLE DATA; Schema: userdata; Owner: flavianzullig
+-- Name: main_classes main_classes_pk; Type: CONSTRAINT; Schema: accounts; Owner: postgres
 --
 
-COPY userdata.teachers_subjects (teacher_id, subject_id) FROM stdin;
-\.
-
-
---
--- Data for Name: users; Type: TABLE DATA; Schema: userdata; Owner: flavianzullig
---
-
-COPY userdata.users (user_id, password) FROM stdin;
-\.
+ALTER TABLE ONLY accounts.main_classes
+    ADD CONSTRAINT main_classes_pk PRIMARY KEY (class_id);
 
 
 --
--- Name: classes_class_id_seq; Type: SEQUENCE SET; Schema: userdata; Owner: flavianzullig
+-- Name: organisations organisations_pk; Type: CONSTRAINT; Schema: accounts; Owner: postgres
 --
 
-SELECT pg_catalog.setval('userdata.classes_class_id_seq', 1, false);
-
-
---
--- Name: grades_grade_id_seq; Type: SEQUENCE SET; Schema: userdata; Owner: flavianzullig
---
-
-SELECT pg_catalog.setval('userdata.grades_grade_id_seq', 1, false);
+ALTER TABLE ONLY accounts.organisations
+    ADD CONSTRAINT organisations_pk PRIMARY KEY (organisation_id);
 
 
 --
--- Name: guardians_guardian_id_seq; Type: SEQUENCE SET; Schema: userdata; Owner: flavianzullig
+-- Name: schools schools_pk; Type: CONSTRAINT; Schema: accounts; Owner: postgres
 --
 
-SELECT pg_catalog.setval('userdata.guardians_guardian_id_seq', 1, false);
-
-
---
--- Name: organisations_organisation_id_seq; Type: SEQUENCE SET; Schema: userdata; Owner: flavianzullig
---
-
-SELECT pg_catalog.setval('userdata.organisations_organisation_id_seq', 1, true);
+ALTER TABLE ONLY accounts.schools
+    ADD CONSTRAINT schools_pk PRIMARY KEY (school_id);
 
 
 --
--- Name: schools_school_id_seq; Type: SEQUENCE SET; Schema: userdata; Owner: flavianzullig
+-- Name: teachers teachers_pk; Type: CONSTRAINT; Schema: accounts; Owner: postgres
 --
 
-SELECT pg_catalog.setval('userdata.schools_school_id_seq', 1, false);
-
-
---
--- Name: students_id_seq; Type: SEQUENCE SET; Schema: userdata; Owner: flavianzullig
---
-
-SELECT pg_catalog.setval('userdata.students_id_seq', 1, false);
+ALTER TABLE ONLY accounts.teachers
+    ADD CONSTRAINT teachers_pk PRIMARY KEY (user_id);
 
 
 --
--- Name: subjects_subject_id_seq; Type: SEQUENCE SET; Schema: userdata; Owner: flavianzullig
+-- Name: users users_pk; Type: CONSTRAINT; Schema: accounts; Owner: postgres
 --
 
-SELECT pg_catalog.setval('userdata.subjects_subject_id_seq', 1, false);
-
-
---
--- Name: teacher_teacher_id_seq; Type: SEQUENCE SET; Schema: userdata; Owner: flavianzullig
---
-
-SELECT pg_catalog.setval('userdata.teacher_teacher_id_seq', 1, false);
+ALTER TABLE ONLY accounts.users
+    ADD CONSTRAINT users_pk PRIMARY KEY (user_id);
 
 
 --
--- Name: users_user_id_seq; Type: SEQUENCE SET; Schema: userdata; Owner: flavianzullig
+-- Name: schools schools_organisations_organisation_id_fk; Type: FK CONSTRAINT; Schema: accounts; Owner: postgres
 --
 
-SELECT pg_catalog.setval('userdata.users_user_id_seq', 1, false);
-
-
---
--- Name: classes classes_pkey; Type: CONSTRAINT; Schema: userdata; Owner: flavianzullig
---
-
-ALTER TABLE ONLY userdata.classes
-    ADD CONSTRAINT classes_pkey PRIMARY KEY (class_id);
+ALTER TABLE ONLY accounts.schools
+    ADD CONSTRAINT schools_organisations_organisation_id_fk FOREIGN KEY (organisation_id) REFERENCES accounts.organisations(organisation_id);
 
 
 --
--- Name: grades grades_pkey; Type: CONSTRAINT; Schema: userdata; Owner: flavianzullig
+-- Name: teachers teachers_schools_school_id_fk; Type: FK CONSTRAINT; Schema: accounts; Owner: postgres
 --
 
-ALTER TABLE ONLY userdata.grades
-    ADD CONSTRAINT grades_pkey PRIMARY KEY (grade_id);
-
-
---
--- Name: guardians guardians_pkey; Type: CONSTRAINT; Schema: userdata; Owner: flavianzullig
---
-
-ALTER TABLE ONLY userdata.guardians
-    ADD CONSTRAINT guardians_pkey PRIMARY KEY (guardian_id);
-
-
---
--- Name: organisations organisations_pkey; Type: CONSTRAINT; Schema: userdata; Owner: flavianzullig
---
-
-ALTER TABLE ONLY userdata.organisations
-    ADD CONSTRAINT organisations_pkey PRIMARY KEY (organisation_id);
-
-
---
--- Name: schools schools_pkey; Type: CONSTRAINT; Schema: userdata; Owner: flavianzullig
---
-
-ALTER TABLE ONLY userdata.schools
-    ADD CONSTRAINT schools_pkey PRIMARY KEY (school_id);
-
-
---
--- Name: students students_pkey; Type: CONSTRAINT; Schema: userdata; Owner: flavianzullig
---
-
-ALTER TABLE ONLY userdata.students
-    ADD CONSTRAINT students_pkey PRIMARY KEY (student_id);
-
-
---
--- Name: subjects subjects_pkey; Type: CONSTRAINT; Schema: userdata; Owner: flavianzullig
---
-
-ALTER TABLE ONLY userdata.subjects
-    ADD CONSTRAINT subjects_pkey PRIMARY KEY (subject_id);
-
-
---
--- Name: teachers teacher_pkey; Type: CONSTRAINT; Schema: userdata; Owner: flavianzullig
---
-
-ALTER TABLE ONLY userdata.teachers
-    ADD CONSTRAINT teacher_pkey PRIMARY KEY (teacher_id);
-
-
---
--- Name: teachers_subjects teachers_subjects_pk; Type: CONSTRAINT; Schema: userdata; Owner: flavianzullig
---
-
-ALTER TABLE ONLY userdata.teachers_subjects
-    ADD CONSTRAINT teachers_subjects_pk PRIMARY KEY (teacher_id, subject_id);
-
-
---
--- Name: users user_id_pk; Type: CONSTRAINT; Schema: userdata; Owner: flavianzullig
---
-
-ALTER TABLE ONLY userdata.users
-    ADD CONSTRAINT user_id_pk PRIMARY KEY (user_id);
-
-
---
--- Name: classes classes_school_id_fkey; Type: FK CONSTRAINT; Schema: userdata; Owner: flavianzullig
---
-
-ALTER TABLE ONLY userdata.classes
-    ADD CONSTRAINT classes_school_id_fkey FOREIGN KEY (school_id) REFERENCES userdata.schools(school_id);
-
-
---
--- Name: grades grades_student_id_fkey; Type: FK CONSTRAINT; Schema: userdata; Owner: flavianzullig
---
-
-ALTER TABLE ONLY userdata.grades
-    ADD CONSTRAINT grades_student_id_fkey FOREIGN KEY (student_id) REFERENCES userdata.students(student_id);
-
-
---
--- Name: grades grades_subject_id_fkey; Type: FK CONSTRAINT; Schema: userdata; Owner: flavianzullig
---
-
-ALTER TABLE ONLY userdata.grades
-    ADD CONSTRAINT grades_subject_id_fkey FOREIGN KEY (subject_id) REFERENCES userdata.subjects(subject_id);
-
-
---
--- Name: guardians guardians_student_id_fkey; Type: FK CONSTRAINT; Schema: userdata; Owner: flavianzullig
---
-
-ALTER TABLE ONLY userdata.guardians
-    ADD CONSTRAINT guardians_student_id_fkey FOREIGN KEY (student_id) REFERENCES userdata.students(student_id);
-
-
---
--- Name: schools schools_organisation_id_fkey; Type: FK CONSTRAINT; Schema: userdata; Owner: flavianzullig
---
-
-ALTER TABLE ONLY userdata.schools
-    ADD CONSTRAINT schools_organisation_id_fkey FOREIGN KEY (organisation_id) REFERENCES userdata.organisations(organisation_id);
-
-
---
--- Name: students students_class_id_fkey; Type: FK CONSTRAINT; Schema: userdata; Owner: flavianzullig
---
-
-ALTER TABLE ONLY userdata.students
-    ADD CONSTRAINT students_class_id_fkey FOREIGN KEY (class_id) REFERENCES userdata.classes(class_id);
-
-
---
--- Name: teachers teacher_school_id_fkey; Type: FK CONSTRAINT; Schema: userdata; Owner: flavianzullig
---
-
-ALTER TABLE ONLY userdata.teachers
-    ADD CONSTRAINT teacher_school_id_fkey FOREIGN KEY (school_id) REFERENCES userdata.schools(school_id);
-
-
---
--- Name: teachers_subjects teachers_subjects_subject_id_fkey; Type: FK CONSTRAINT; Schema: userdata; Owner: flavianzullig
---
-
-ALTER TABLE ONLY userdata.teachers_subjects
-    ADD CONSTRAINT teachers_subjects_subject_id_fkey FOREIGN KEY (subject_id) REFERENCES userdata.subjects(subject_id);
-
-
---
--- Name: teachers_subjects teachers_subjects_teacher_id_fkey; Type: FK CONSTRAINT; Schema: userdata; Owner: flavianzullig
---
-
-ALTER TABLE ONLY userdata.teachers_subjects
-    ADD CONSTRAINT teachers_subjects_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES userdata.teachers(teacher_id);
+ALTER TABLE ONLY accounts.teachers
+    ADD CONSTRAINT teachers_schools_school_id_fk FOREIGN KEY (school_id) REFERENCES accounts.schools(school_id);
 
 
 --
