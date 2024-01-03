@@ -1,41 +1,32 @@
-import {generateUUID} from "../database/crypto.js";
-import {dbQuery} from "../database/postgres.js";
+import { generateUUID } from "../database/crypto.js";
+import { DatabaseColumn } from "./DatabaseColumn.js";
+import { insert } from "../database/queries.js";
 
-export class Class {
-    readonly uuid: string;
-
+export class Class extends DatabaseColumn {
     constructor(uuid: string) {
-        this.uuid = uuid;
+        super(uuid, "classes", "class_id");
     }
     /**Create a new class in the database
      * @returns {Class}, the created class instance
      * */
-    static async createClass(): Promise<Class>
-    {
-        try {
-            const uuid = generateUUID();
-            await dbQuery("INSERT INTO accounts.classes (class_id) VALUES ($1)", [uuid]);
-            return new Class(uuid)
-        }catch (e) {
-            throw new Error("Failed to create class in database", {cause: e})
-        }
+    static async createClass(grade: string): Promise<Class> {
+        const uuid = generateUUID();
+        await insert("classes", ["class_id", "grade"], uuid, [grade]);
+        return new Class(uuid);
     }
-    /** Delete the class from the database
+    /** Get the grade of the class
+     * @returns {string}, the grade of the class
      * */
-    async delete()
-    {
-        try {
-            await dbQuery("DELETE FROM accounts.classes WHERE class_id=$1", [this.uuid])
-        }catch (e)
-        {
-            throw new Error("Failed to delete class '" + this.uuid + "' from database", {cause: e})
-        }
+    async getGrade(): Promise<string> {
+        return await this.get("grade");
+    }
+    /** Change the grade of the class
+     * @param {string} short the to be set grade
+     * */
+    async setGrade(short: string) {
+        await this.set("short", short);
     }
     /**Get the uuid of the user
      * @returns {string} the uuid of the class
      * */
-    getUUID(): string
-    {
-        return this.uuid;
-    }
 }
