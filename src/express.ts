@@ -1,6 +1,7 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import { User } from "./classes/User.js";
+import cors from "cors";
 import dotenv from "./dotenv.js";
 import jwt from "jsonwebtoken";
 const { sign, verify } = jwt;
@@ -10,6 +11,13 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+const corsOrigin = {
+    origin: "http://localhost:5173",
+    credentials: true,
+    optionSuccessStatus: 200,
+};
+app.use(cors(corsOrigin));
 const accessSecret = dotenv.jwtAccessSecret;
 const refreshSecret = dotenv.jwtRefreshSecret;
 
@@ -32,7 +40,7 @@ app.post("/login", async (req, res) => {
         return;
     }
     const accessToken = sign({ user_id: uuid }, accessSecret, {
-        expiresIn: "15s",
+        expiresIn: "15m",
     });
     const refreshToken = sign({ user_id: uuid }, refreshSecret, {
         expiresIn: "30d",
@@ -72,7 +80,7 @@ app.post("/refreshAccessToken", (req, res) => {
                 { user_id: decoded["user_id"] },
                 accessSecret,
                 {
-                    expiresIn: "15s",
+                    expiresIn: "15m",
                 },
             );
             res.cookie("accessToken", accessToken, {
