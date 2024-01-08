@@ -5,7 +5,9 @@ configDotenv();
 const client = new pg.Client({
     connectionString: process.env.DATABASEURL,
 });
-await client.connect();
+await client.connect(() => {
+    console.log("Connected")
+});
 
 /**Execute a query in the database
  * @param {string} query the sql query to be executed
