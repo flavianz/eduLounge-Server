@@ -1,12 +1,12 @@
 import pg from "pg";
-import { configDotenv } from "dotenv";
-configDotenv();
+import dotenv from "../dotenv.js";
 
 const client = new pg.Client({
-    connectionString: process.env.DATABASEURL,
+    connectionString: dotenv.databaseURL,
 });
-await client.connect(() => {
-    console.log("Connected")
+
+client.connect(() => {
+    console.log("Connected");
 });
 
 /**Execute a query in the database
