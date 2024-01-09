@@ -1,9 +1,9 @@
 import { deleteFrom, insert, select, update } from "../database/queries.js";
 
 export class DatabaseColumn {
-    readonly uuid: string;
-    readonly tableName: string;
-    readonly idRow: string;
+    private readonly uuid: string;
+    private readonly tableName: string;
+    private readonly idRow: string;
 
     constructor(uuid: string, tableName: string, idRow: string) {
         this.uuid = uuid;
