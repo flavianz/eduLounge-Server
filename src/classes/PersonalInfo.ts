@@ -10,6 +10,7 @@ export class PersonalInfo extends DatabaseColumn {
 
     static async createPersonalInfo(
         personalInfo: Types.PersonalInfo,
+        user_id: string
     ): Promise<PersonalInfo> {
         const uuid = generateUUID();
         await insert(
@@ -29,6 +30,7 @@ export class PersonalInfo extends DatabaseColumn {
                 "landline",
                 "email",
                 "birth_date",
+                "user_id"
             ],
             uuid,
             [
@@ -45,6 +47,7 @@ export class PersonalInfo extends DatabaseColumn {
                 personalInfo.landline,
                 personalInfo.email,
                 personalInfo.birth_date,
+                user_id
             ],
         );
         return new PersonalInfo(uuid);
