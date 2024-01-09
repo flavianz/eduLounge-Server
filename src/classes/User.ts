@@ -12,8 +12,7 @@ export class User extends DatabaseColumn {
      * @param {string} username The username for the user
      * @returns {User}, a class instance of the created user in the database
      * */
-    static async createUser(password: string, username: string)
-    {
+    static async createUser(username: string, password: string) {
         const uuid = generateUUID();
         await insert(
             "users",
@@ -52,9 +51,8 @@ export class User extends DatabaseColumn {
     /**Get the username of the user
      * @returns {string} the username
      * */
-    async getUsername()
-    {
-        return await this.get("username")
+    async getUsername() {
+        return await this.get("username");
     }
     /**Set the username of the user
      * @param {string} username the to be set username

@@ -13,9 +13,9 @@ export class Teacher extends User {
      * @returns {Teacher}, a class instance of the created teacher in the database
      * */
     static async createTeacher(
+        username: string,
         password: string,
         school_id: string,
-        username: string,
     ): Promise<Teacher> {
         const uuid = generateUUID();
         await insert(
