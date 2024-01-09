@@ -32,9 +32,9 @@ export async function insert(
     values: string[],
     encryptValues = true,
 ) {
-    let valuesString: string = "";
+    let valuesString: string = "$1,";
     for (let i = 0; i < values.length; i++) {
-        valuesString += `$${i + 1}` + (i !== values.length - 1 ? "," : "");
+        valuesString += `$${i + 2}` + (i !== values.length - 1 ? "," : "");
     }
     let fieldsString: string = "";
     for (let i = 0; i < fields.length; i++) {
@@ -70,7 +70,7 @@ export async function select(
             `SELECT ${item} FROM accounts.${table} WHERE ${condition_row}=$1`,
             [uuid],
         );
-        //Check for empty result
+        //Check for an empty result
         if (result.rows.length === 0) {
             throw new Error(
                 `No ${table} found in database with UUID '${uuid}'`,
