@@ -1,5 +1,5 @@
 import { DatabaseColumn } from "./DatabaseColumn.js";
-import { generateUUID } from "../database/crypto.js";
+import { encrypt, generateUUID } from "../database/crypto.js";
 import { insert } from "../database/queries.js";
 import * as Types from "../types.js";
 
@@ -10,7 +10,7 @@ export class PersonalInfo extends DatabaseColumn {
 
     static async createPersonalInfo(
         personalInfo: Types.PersonalInfo,
-        user_id: string
+        user_id: string,
     ): Promise<PersonalInfo> {
         const uuid = generateUUID();
         await insert(
@@ -30,25 +30,26 @@ export class PersonalInfo extends DatabaseColumn {
                 "landline",
                 "email",
                 "birth_date",
-                "user_id"
+                "user_id",
             ],
             uuid,
             [
-                personalInfo.first_name,
-                personalInfo.middle_name,
-                personalInfo.last_name,
-                personalInfo.street,
-                personalInfo.number,
-                personalInfo.city,
-                personalInfo.apartment,
-                personalInfo.zip_code,
-                personalInfo.country,
-                personalInfo.cellular,
-                personalInfo.landline,
-                personalInfo.email,
-                personalInfo.birth_date,
-                user_id
+                encrypt(personalInfo.first_name),
+                encrypt(personalInfo.middle_name),
+                encrypt(personalInfo.last_name),
+                encrypt(personalInfo.street),
+                encrypt(personalInfo.number),
+                encrypt(personalInfo.city),
+                encrypt(personalInfo.apartment),
+                encrypt(personalInfo.zip_code),
+                encrypt(personalInfo.country),
+                encrypt(personalInfo.cellular),
+                encrypt(personalInfo.landline),
+                encrypt(personalInfo.email),
+                encrypt(personalInfo.birth_date),
+                user_id,
             ],
+            false,
         );
         return new PersonalInfo(uuid);
     }
