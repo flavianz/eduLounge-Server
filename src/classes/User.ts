@@ -1,11 +1,30 @@
-import { decrypt, encrypt, hash } from "../database/crypto.js";
+import { encrypt, generateUUID, hash } from "../database/crypto.js";
 import { DatabaseColumn } from "./DatabaseColumn.js";
 import { dbQuery } from "../database/postgres.js";
+import { insert } from "../database/queries.js";
 
 export class User extends DatabaseColumn {
     constructor(uuid: string) {
         super(uuid, "users", "user_id");
     }
+    /** Create a teacher in the database
+     * @param {string} password The password for the user
+     * @param {string} username The username for the user
+     * @returns {User}, a class instance of the created user in the database
+     * */
+    static async createUser(password: string, username: string)
+    {
+        const uuid = generateUUID();
+        await insert(
+            "users",
+            ["user_id", "password", "username"],
+            uuid,
+            [hash(password), encrypt(username)],
+            false,
+        );
+        return new User(uuid);
+    }
+
     /**Get the uuid of a specific username
      * @param {string} username the username to get uuid from
      * @returns {Promise<string>} the uuid
@@ -29,6 +48,19 @@ export class User extends DatabaseColumn {
                 { cause: e },
             );
         }
+    }
+    /**Get the username of the user
+     * @returns {string} the username
+     * */
+    async getUsername()
+    {
+        return await this.get("username")
+    }
+    /**Set the username of the user
+     * @param {string} username the to be set username
+     * */
+    async setUsername(username: string) {
+        await this.set("username", username);
     }
     /**Get the hashed password of the user
      * @returns {string} the hashed password
