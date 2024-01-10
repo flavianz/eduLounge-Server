@@ -4,8 +4,8 @@ import { dbQuery } from "../database/postgres.js";
 import { insert } from "../database/queries.js";
 
 export class User extends DatabaseColumn {
-    constructor(uuid: string) {
-        super(uuid, "users", "user_id");
+    constructor(uuid: string, tableName: string) {
+        super(uuid, tableName, "user_id");
     }
     /** Create a teacher in the database
      * @param {string} password The password for the user
@@ -21,7 +21,7 @@ export class User extends DatabaseColumn {
             [hash(password), encrypt(username)],
             false,
         );
-        return new User(uuid);
+        return new User(uuid, "users");
     }
 
     /**Get the uuid of a specific username
@@ -84,6 +84,4 @@ export class User extends DatabaseColumn {
             throw new Error("Failed to compare the passwords", { cause: e });
         }
     }
-    /** Delete the user from the database
-     * */
 }

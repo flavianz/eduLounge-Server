@@ -4,7 +4,7 @@ import { insert } from "../database/queries.js";
 
 export class Teacher extends User {
     constructor(uuid: string) {
-        super(uuid);
+        super(uuid, "teachers");
     }
     /** Create a teacher in the database
      * @param {string} password The password for the teacher
