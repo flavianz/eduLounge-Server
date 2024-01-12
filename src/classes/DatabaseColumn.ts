@@ -1,4 +1,4 @@
-import { deleteFrom, insert, select, update } from "../database/queries.js";
+import { deleteFrom, select, update } from "../database/queries.js";
 
 export class DatabaseColumn {
     private readonly uuid: string;
