@@ -4,6 +4,7 @@ import { User } from "./classes/User.js";
 import cors from "cors";
 import dotenv from "./dotenv.js";
 import jwt from "jsonwebtoken";
+import { checkAccessToken } from "./jwt.js";
 const { sign, verify } = jwt;
 
 const app = express();
@@ -61,13 +62,12 @@ app.post("/login", async (req, res) => {
     return res.sendStatus(200);
 });
 
-app.post("/refreshAccessToken", (req, res) => {
+app.get("/refreshAccessToken", (req, res) => {
     const refreshToken = req.cookies["refreshToken"];
     if (!refreshToken) {
         res.status(400).json({ message: "Missing refresh token cookie" });
         return;
     }
-    console.log(refreshToken);
     verify(
         refreshToken,
         dotenv.jwtRefreshSecret,
@@ -92,6 +92,11 @@ app.post("/refreshAccessToken", (req, res) => {
             res.sendStatus(200);
         },
     );
+});
+
+app.get("/getMarks", (req, res) => {
+    const loggedIn = checkAccessToken(req, res);
+    if(!loggedIn)
 });
 
 app.get("/testAccessToken", (req, res) => {
