@@ -4,7 +4,7 @@ import { dbQuery } from "../database/postgres.js";
 import { insert } from "../database/queries.js";
 
 export class User extends DatabaseColumn {
-    constructor(uuid: string, tableName: string) {
+    constructor(uuid: string, tableName: string = "users") {
         super(uuid, tableName, "user_id");
     }
     /** Create a teacher in the database
