@@ -23,7 +23,6 @@ export function encrypt(string: string): string {
  * @returns {string} the decrypted string
  * */
 export function decrypt(string: string): string {
-    console.log("Hello" + string);
     const buff = Buffer.from(string, "base64");
     const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
     return (

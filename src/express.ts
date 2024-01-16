@@ -1,11 +1,19 @@
-import express from "express";
+import express, { raw } from "express";
 import cookieParser from "cookie-parser";
 import { User } from "./classes/User.js";
 import cors from "cors";
 import dotenv from "./dotenv.js";
 import jwt from "jsonwebtoken";
-import { checkAccessToken } from "./jwt.js";
-const { sign, verify } = jwt;
+import {
+    checkAccessToken,
+    generateNewAccessToken,
+    generateNewRefreshToken,
+} from "./jwt.js";
+import { dbQuery } from "./database/postgres.js";
+import { QueryResult } from "pg";
+import { decrypt } from "./database/crypto.js";
+
+const { verify } = jwt;
 
 const app = express();
 
@@ -40,12 +48,8 @@ app.post("/login", async (req, res) => {
         res.status(406).json({ message: "Wrong user credentials" });
         return;
     }
-    const accessToken = sign({ user_id: uuid }, accessSecret, {
-        expiresIn: "15m",
-    });
-    const refreshToken = sign({ user_id: uuid }, refreshSecret, {
-        expiresIn: "30d",
-    });
+    const accessToken = generateNewAccessToken(uuid);
+    const refreshToken = generateNewRefreshToken(uuid);
     res.cookie("accessToken", accessToken, {
         httpOnly: true,
         sameSite: "strict",
@@ -63,40 +67,45 @@ app.post("/login", async (req, res) => {
 });
 
 app.get("/refreshAccessToken", (req, res) => {
-    const refreshToken = req.cookies["refreshToken"];
-    if (!refreshToken) {
-        res.status(400).json({ message: "Missing refresh token cookie" });
-        return;
-    }
-    verify(
-        refreshToken,
-        dotenv.jwtRefreshSecret,
-        (err: Error, decoded: object) => {
-            if (err || !decoded["user_id"]) {
-                res.status(406).json({ message: "refresh token invalid" });
-                return;
-            }
-            const accessToken = sign(
-                { user_id: decoded["user_id"] },
-                accessSecret,
-                {
-                    expiresIn: "15m",
-                },
-            );
-            res.cookie("accessToken", accessToken, {
-                httpOnly: true,
-                sameSite: "strict",
-                secure: true,
-                maxAge: 900000 /* 15m */,
-            });
-            res.sendStatus(200);
-        },
-    );
+    checkAccessToken(req, res);
 });
 
-app.get("/getMarks", (req, res) => {
-    const loggedIn = checkAccessToken(req, res);
-    if(!loggedIn)
+app.get("/getMarks", async (req, res) => {
+    const user_id = checkAccessToken(req, res);
+    if (!user_id) {
+        return;
+    }
+    let marks: QueryResult<any>;
+    try {
+        marks = await dbQuery(
+            `SELECT mark_id, mark, mark_weight FROM accounts.marks WHERE student_id='${user_id}'`,
+        );
+    } catch (e) {
+        res.sendStatus(500);
+    }
+    res.send(
+        marks.rows.map((mark) => {
+            return {
+                uuid: mark["mark_id"],
+                mark: decrypt(mark["mark"]),
+                mark_weight: decrypt(mark["mark_weight"]),
+            };
+        }),
+    );
+    //SELECT
+    //     username, name
+    // FROM
+    //     accounts.students s
+    // JOIN
+    //     accounts.students_classes sc
+    // ON
+    //     sc.student_id = s.user_id
+    // JOIN
+    //     accounts.classes c
+    // ON
+    //     sc.class_id = c.class_id
+    // INNER JOIN
+    //     accounts.subjects ON c.subject_id = accounts.subjects.subject_id
 });
 
 app.get("/testAccessToken", (req, res) => {
