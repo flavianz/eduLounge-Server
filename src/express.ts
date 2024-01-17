@@ -27,8 +27,20 @@ const corsOrigin = {
     optionSuccessStatus: 200,
 };
 app.use(cors(corsOrigin));
-const accessSecret = dotenv.jwtAccessSecret;
-const refreshSecret = dotenv.jwtRefreshSecret;
+
+app.get("/logout", (req, res) => {
+    res.clearCookie("accessToken", {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: true,
+    });
+    res.clearCookie("refreshToken", {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: true,
+    });
+    res.sendStatus(200);
+});
 
 app.post("/login", async (req, res) => {
     const { username, password } = req.body;
@@ -70,18 +82,26 @@ app.get("/refreshAccessToken", (req, res) => {
     checkAccessToken(req, res);
 });
 
-app.get("/getMarks", async (req, res) => {
+app.post("/getMarks", async (req, res) => {
     const user_id = checkAccessToken(req, res);
+    const { subject_id } = req.body;
     if (!user_id) {
         return;
+    }
+    if (!subject_id) {
+        //response already sent by checkAccessToken()
+        res.sendStatus(406);
     }
     let marks: QueryResult<any>;
     try {
         marks = await dbQuery(
-            `SELECT mark_id, mark, mark_weight FROM accounts.marks WHERE student_id='${user_id}'`,
+            `SELECT mark_id, mark, mark_weight, m.name, date FROM accounts.marks m 
+                        JOIN accounts.subjects s on m.subject_id = s.subject_id WHERE student_id=$1 AND m.subject_id=$2`,
+            [user_id, subject_id],
         );
     } catch (e) {
         res.sendStatus(500);
+        return;
     }
     res.send(
         marks.rows.map((mark) => {
@@ -89,23 +109,42 @@ app.get("/getMarks", async (req, res) => {
                 uuid: mark["mark_id"],
                 mark: decrypt(mark["mark"]),
                 mark_weight: decrypt(mark["mark_weight"]),
+                name: decrypt(mark["name"]),
+                date: decrypt(mark["date"]),
             };
         }),
     );
-    //SELECT
-    //     username, name
-    // FROM
-    //     accounts.students s
-    // JOIN
-    //     accounts.students_classes sc
-    // ON
-    //     sc.student_id = s.user_id
-    // JOIN
-    //     accounts.classes c
-    // ON
-    //     sc.class_id = c.class_id
-    // INNER JOIN
-    //     accounts.subjects ON c.subject_id = accounts.subjects.subject_id
+});
+
+app.get("/getSubjects", async (req, res) => {
+    const user_id = checkAccessToken(req, res);
+    if (!user_id) {
+        //response already sent by checkAccessToken()
+        return;
+    }
+    let subjects: QueryResult<any>;
+    try {
+        subjects = await dbQuery(
+            `SELECT accounts.subjects.name as name, accounts.subjects.subject_id as subject_id
+                        FROM accounts.students s
+                        JOIN accounts.students_classes sc ON sc.student_id = s.user_id
+                        JOIN accounts.classes c ON sc.class_id = c.class_id
+                        INNER JOIN accounts.subjects ON c.subject_id = accounts.subjects.subject_id
+                        WHERE s.user_id=$1`,
+            [user_id],
+        );
+    } catch (e) {
+        res.sendStatus(500);
+        return;
+    }
+    res.send(
+        subjects.rows.map((subject) => {
+            return {
+                name: decrypt(subject["name"]),
+                subject_id: subject["subject_id"],
+            };
+        }),
+    );
 });
 
 app.get("/testAccessToken", (req, res) => {
