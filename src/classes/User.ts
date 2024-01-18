@@ -10,18 +10,23 @@ export class User extends DatabaseColumn {
     /** Create a teacher in the database
      * @param {string} password The password for the user
      * @param {string} username The username for the user
+     * @param {string} permissionID The permission ID for the user
      * @returns {User}, a class instance of the created user in the database
      * */
-    static async createUser(username: string, password: string) {
+    static async createUser(
+        username: string,
+        password: string,
+        permissionID: string,
+    ) {
         const uuid = generateUUID();
         await insert(
             "users",
-            ["user_id", "password", "username"],
+            ["user_id", "password", "username", "permission_id"],
             uuid,
-            [hash(password), encrypt(username)],
+            [hash(password), encrypt(username), permissionID],
             false,
         );
-        return new User(uuid, "users");
+        return new User(uuid);
     }
 
     /**Get the uuid of a specific username

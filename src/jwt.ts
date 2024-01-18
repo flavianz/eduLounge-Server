@@ -4,32 +4,39 @@ const { verify, sign } = pkg;
 import dotenv from "./dotenv.js";
 import { Request, Response } from "express-serve-static-core";
 import { ParsedQs } from "qs";
+import { AccessTokenData, RefreshTokenData } from "./types.js";
 
-function isValidRefreshToken(refreshToken: string): false | string {
-    if (!refreshToken) {
-        return false;
+function decodeAccessToken(accessToken: string): null | AccessTokenData {
+    if (!accessToken) {
+        return null;
     }
-    let result: false | string = false;
+    let result: null | AccessTokenData = null;
     verify(
-        refreshToken,
-        dotenv.jwtRefreshSecret,
-        (err: Error, decoded: object) => {
-            result = err || !decoded["user_id"] ? false : decoded["user_id"];
+        accessToken,
+        dotenv.jwtAccessSecret,
+        (err: Error, decoded: AccessTokenData) => {
+            if (err) {
+                return;
+            }
+            return !decoded.user_id ? null : decoded;
         },
     );
     return result;
 }
 
-function isValidAccessToken(accessToken: string): false | string {
-    if (!accessToken) {
-        return false;
+function decodeRefreshToken(refreshToken: string): null | RefreshTokenData {
+    if (!refreshToken) {
+        return null;
     }
-    let result: false | string = false;
+    let result: null | RefreshTokenData = null;
     verify(
-        accessToken,
-        dotenv.jwtAccessSecret,
-        (err: Error, decoded: object) => {
-            result = err || !decoded["user_id"] ? false : decoded["user_id"];
+        refreshToken,
+        dotenv.jwtRefreshSecret,
+        (err: Error, decoded: RefreshTokenData) => {
+            if (err) {
+                return;
+            }
+            return !decoded.user_id ? null : decoded;
         },
     );
     return result;
@@ -49,25 +56,26 @@ export function generateNewRefreshToken(user_id: string) {
 export function checkAccessToken(
     req: Request<{}, any, any, ParsedQs, Record<string, any>>,
     res: Response<any, Record<string, any>, number>,
-): false | string {
+): null | AccessTokenData {
     if (!req.cookies) {
         res.sendStatus(401);
+        return null;
     }
-    let user = isValidAccessToken(req.cookies["accessToken"]);
-    if (user) {
-        return user;
+    const accessToken = decodeAccessToken(req.cookies["accessToken"]);
+    if (accessToken) {
+        return accessToken;
     }
-    user = isValidRefreshToken(req.cookies["refreshToken"]);
-    if (user && typeof user !== "boolean") {
-        const accessToken = generateNewAccessToken(user);
+    const refreshToken = decodeRefreshToken(req.cookies["refreshToken"]);
+    if (refreshToken) {
+        const accessToken = generateNewAccessToken(refreshToken.user_id);
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
             sameSite: "strict",
             secure: true,
             maxAge: 900000 /* 15m */,
         });
-        return user;
+        return decodeAccessToken(accessToken);
     }
     res.sendStatus(401);
-    return false;
+    return null;
 }

@@ -82,7 +82,7 @@ app.get("/refreshAccessToken", (req, res) => {
     checkAccessToken(req, res);
 });
 
-app.post("/getMarks", async (req, res) => {
+app.post("/students/getMarks", async (req, res) => {
     const user_id = checkAccessToken(req, res);
     const { subject_id } = req.body;
     if (!user_id) {
@@ -116,9 +116,14 @@ app.post("/getMarks", async (req, res) => {
     );
 });
 
-app.get("/getSubjects", async (req, res) => {
-    const user_id = checkAccessToken(req, res);
-    if (!user_id) {
+app.get("/students/getSubjects", async (req, res) => {
+    const user = checkAccessToken(req, res);
+    const permissionResult = await dbQuery(
+        "SELECT accounts.permissions.readownmarks FROM accounts.users u JOIN accounts.users_roles ur on ur.user_id=u.user_id JOIN accounts.roles r on r.role_id=ur.role_id JOIN accounts.permissions p on p.permission_id=r.permission_id or p.permission_id=u.permission_id WHERE u.user_id=$1",
+        [user.user_id],
+    );
+    console.log();
+    if (!user) {
         //response already sent by checkAccessToken()
         return;
     }
@@ -131,7 +136,7 @@ app.get("/getSubjects", async (req, res) => {
                         JOIN accounts.classes c ON sc.class_id = c.class_id
                         INNER JOIN accounts.subjects ON c.subject_id = accounts.subjects.subject_id
                         WHERE s.user_id=$1`,
-            [user_id],
+            [user.user_id],
         );
     } catch (e) {
         res.sendStatus(500);

@@ -13,3 +13,11 @@ export interface PersonalInfo {
     email: string;
     birth_date: string;
 }
+
+export type Permission = "readownmarks";
+
+export interface AccessTokenData extends RefreshTokenData {}
+
+export interface RefreshTokenData {
+    user_id: string;
+}
