@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data>
+  <object-set>
+    <table path="edulounge.accounts.personal_info">
+      <table path="edulounge.accounts.users" name="virtual_foreign_key_name" from="user_id" to="user_id"/>
+    </table>
+    <table path='edulounge.accounts.users_roles'>
+      <table path='edulounge.accounts.users' name="virtual_foreign_key_name" from="user_id" to="user_id"/>
+    </table>
+  </object-set>
+</data>
