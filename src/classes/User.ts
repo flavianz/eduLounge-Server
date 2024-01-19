@@ -2,6 +2,8 @@ import { encrypt, generateUUID, hash } from "../database/crypto.js";
 import { DatabaseColumn } from "./DatabaseColumn.js";
 import { dbQuery } from "../database/postgres.js";
 import { insert } from "../database/queries.js";
+import { Permission } from "../types.js";
+import { QueryResult } from "pg";
 
 export class User extends DatabaseColumn {
     constructor(uuid: string, tableName: string = "users") {
@@ -13,7 +15,7 @@ export class User extends DatabaseColumn {
      * @param {string} permissionID The permission ID for the user
      * @returns {User}, a class instance of the created user in the database
      * */
-    static async createUser(
+    static async insertUser(
         username: string,
         password: string,
         permissionID: string,
@@ -53,6 +55,34 @@ export class User extends DatabaseColumn {
             );
         }
     }
+
+    async hasPermissions(permissions: Permission[])
+    {
+        let selection: string = "";
+        for(let i = 0; i < permissions.length; i++)
+        {
+            const perm = permissions[i]
+            selection += "p." + perm + (i + 1 < permissions.length ? ", " : "")
+        }
+        let response: QueryResult<any>;
+        try {
+            response = await dbQuery(`SELECT ${selection} FROM accounts.users u JOIN accounts.users_roles ur on ur.user_id=u.user_id JOIN accounts.roles r on r.role_id=ur.role_id JOIN accounts.permissions p on p.permission_id=r.permission_id or p.permission_id=u.permission_id WHERE u.user_id=$1`, [this.getUUID()])
+        }catch (e) {
+            let result = {}
+            for(const perm of permissions)
+            {
+                result[perm] = false
+            }
+            return result;
+        }
+        let result: {[id: string]: boolean} = {}
+        for(const perm of permissions)
+        {
+            result[perm] = (response.rows[0] && (response.rows[0][perm] ?? false)) || (response.rows[1] && (response.rows[1][perm] ?? false))
+        }
+        return result
+    }
+
     /**Get the username of the user
      * @returns {string} the username
      * */
