@@ -56,31 +56,37 @@ export class User extends DatabaseColumn {
         }
     }
 
-    async hasPermissions(permissions: Permission[])
-    {
+    async hasPermissions(
+        permissions: Permission[],
+    ): Promise<{ [key in Permission]?: boolean }> {
         let selection: string = "";
-        for(let i = 0; i < permissions.length; i++)
-        {
-            const perm = permissions[i]
-            selection += "p." + perm + (i + 1 < permissions.length ? ", " : "")
+        for (let i = 0; i < permissions.length; i++) {
+            const perm = permissions[i];
+            selection += "p." + perm + (i + 1 < permissions.length ? ", " : "");
         }
         let response: QueryResult<any>;
         try {
-            response = await dbQuery(`SELECT ${selection} FROM accounts.users u JOIN accounts.users_roles ur on ur.user_id=u.user_id JOIN accounts.roles r on r.role_id=ur.role_id JOIN accounts.permissions p on p.permission_id=r.permission_id or p.permission_id=u.permission_id WHERE u.user_id=$1`, [this.getUUID()])
-        }catch (e) {
-            let result = {}
-            for(const perm of permissions)
-            {
-                result[perm] = false
+            response = await dbQuery(
+                `SELECT ${selection} FROM accounts.users u 
+                JOIN accounts.users_roles ur on ur.user_id=u.user_id JOIN accounts.roles r on r.role_id=ur.role_id 
+                JOIN accounts.permissions p on p.permission_id=r.permission_id or p.permission_id=u.permission_id 
+                    WHERE u.user_id=$1`,
+                [this.getUUID()],
+            );
+        } catch (e) {
+            let result = {};
+            for (const perm of permissions) {
+                result[perm] = false;
             }
             return result;
         }
-        let result: {[id: string]: boolean} = {}
-        for(const perm of permissions)
-        {
-            result[perm] = (response.rows[0] && (response.rows[0][perm] ?? false)) || (response.rows[1] && (response.rows[1][perm] ?? false))
+        let result: { [key in Permission]?: boolean } = {};
+        for (const perm of permissions) {
+            result[perm] =
+                (response.rows[0] && (response.rows[0][perm] ?? false)) ||
+                (response.rows[1] && (response.rows[1][perm] ?? false));
         }
-        return result
+        return result;
     }
 
     /**Get the username of the user

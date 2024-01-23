@@ -18,7 +18,7 @@ function decodeAccessToken(accessToken: string): null | AccessTokenData {
             if (err) {
                 return;
             }
-            return !decoded.user_id ? null : decoded;
+            result = !decoded.user_id ? null : decoded;
         },
     );
     return result;
@@ -36,7 +36,7 @@ function decodeRefreshToken(refreshToken: string): null | RefreshTokenData {
             if (err) {
                 return;
             }
-            return !decoded.user_id ? null : decoded;
+            result = !decoded.user_id ? null : decoded;
         },
     );
     return result;
@@ -75,7 +75,8 @@ export function checkAccessToken(
             maxAge: 900000 /* 15m */,
         });
         return decodeAccessToken(accessToken);
+    } else {
+        res.sendStatus(401);
     }
-    res.sendStatus(401);
     return null;
 }

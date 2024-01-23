@@ -83,21 +83,28 @@ app.get("/refreshAccessToken", (req, res) => {
 });
 
 app.post("/students/getMarks", async (req, res) => {
-    const user_id = checkAccessToken(req, res);
+    const accessToken = checkAccessToken(req, res);
     const { subject_id } = req.body;
-    if (!user_id) {
+    if (!accessToken) {
+        //response already sent by checkAccessToken()
         return;
     }
     if (!subject_id) {
-        //response already sent by checkAccessToken()
         res.sendStatus(406);
+        return;
+    }
+    const user = new User(accessToken.user_id);
+    const permissions = await user.hasPermissions(["readownmarks"]);
+    if (!permissions.readownmarks) {
+        res.sendStatus(401);
+        return;
     }
     let marks: QueryResult<any>;
     try {
         marks = await dbQuery(
             `SELECT mark_id, mark, mark_weight, m.name, date FROM accounts.marks m 
                         JOIN accounts.subjects s on m.subject_id = s.subject_id WHERE student_id=$1 AND m.subject_id=$2`,
-            [user_id, subject_id],
+            [accessToken.user_id, subject_id],
         );
     } catch (e) {
         res.sendStatus(500);
@@ -117,28 +124,29 @@ app.post("/students/getMarks", async (req, res) => {
 });
 
 app.get("/students/getSubjects", async (req, res) => {
-    const user = checkAccessToken(req, res);
-    const permissionResult = await dbQuery(
-        "SELECT accounts.permissions.readownmarks FROM accounts.users u JOIN accounts.users_roles ur on ur.user_id=u.user_id JOIN accounts.roles r on r.role_id=ur.role_id JOIN accounts.permissions p on p.permission_id=r.permission_id or p.permission_id=u.permission_id WHERE u.user_id=$1",
-        [user.user_id],
-    );
-    console.log();
-    if (!user) {
+    const accessToken = checkAccessToken(req, res);
+    if (!accessToken) {
         //response already sent by checkAccessToken()
+        return;
+    }
+    const user = new User(accessToken.user_id);
+    const permissions = await user.hasPermissions(["readownmarks"]);
+    if (!permissions.readownmarks) {
+        res.sendStatus(401);
         return;
     }
     let subjects: QueryResult<any>;
     try {
         subjects = await dbQuery(
-            `SELECT accounts.subjects.name as name, accounts.subjects.subject_id as subject_id
+            `SELECT su.name as name, su.subject_id as subject_id
                         FROM accounts.students s
-                        JOIN accounts.students_classes sc ON sc.student_id = s.user_id
-                        JOIN accounts.classes c ON sc.class_id = c.class_id
-                        INNER JOIN accounts.subjects ON c.subject_id = accounts.subjects.subject_id
+                        JOIN accounts.marks m ON m.student_id = s.user_id
+                        JOIN accounts.subjects su ON m.subject_id = su.subject_id
                         WHERE s.user_id=$1`,
-            [user.user_id],
+            [accessToken.user_id],
         );
     } catch (e) {
+        console.log(e);
         res.sendStatus(500);
         return;
     }
