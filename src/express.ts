@@ -1,4 +1,4 @@
-import express, { raw } from "express";
+import express from "express";
 import cookieParser from "cookie-parser";
 import { User } from "./classes/User.js";
 import cors from "cors";
@@ -12,6 +12,7 @@ import {
 import { dbQuery } from "./database/postgres.js";
 import { QueryResult } from "pg";
 import { decrypt } from "./database/crypto.js";
+import { Permission } from "./types.js";
 
 const { verify } = jwt;
 
@@ -28,7 +29,7 @@ const corsOrigin = {
 };
 app.use(cors(corsOrigin));
 
-app.get("/logout", (req, res) => {
+app.head("/logout", (req, res) => {
     res.clearCookie("accessToken", {
         httpOnly: true,
         sameSite: "strict",
@@ -82,7 +83,7 @@ app.get("/refreshAccessToken", (req, res) => {
     checkAccessToken(req, res);
 });
 
-app.post("/students/getMarks", async (req, res) => {
+app.post("/students/marks", async (req, res) => {
     const accessToken = checkAccessToken(req, res);
     const { subject_id } = req.body;
     if (!accessToken) {
@@ -94,8 +95,10 @@ app.post("/students/getMarks", async (req, res) => {
         return;
     }
     const user = new User(accessToken.user_id);
-    const permissions = await user.hasPermissions(["readownmarks"]);
-    if (!permissions.readownmarks) {
+    const permissions = await user.hasPermissions([
+        Permission.Student_readMarks,
+    ]);
+    if (!permissions.student_readownmarks) {
         res.sendStatus(401);
         return;
     }
@@ -123,15 +126,19 @@ app.post("/students/getMarks", async (req, res) => {
     );
 });
 
-app.get("/students/getSubjects", async (req, res) => {
+app.post("/users/createOrganization", async (req, res) => {});
+
+app.get("/students/subjects", async (req, res) => {
     const accessToken = checkAccessToken(req, res);
     if (!accessToken) {
         //response already sent by checkAccessToken()
         return;
     }
     const user = new User(accessToken.user_id);
-    const permissions = await user.hasPermissions(["readownmarks"]);
-    if (!permissions.readownmarks) {
+    const permissions = await user.hasPermissions([
+        Permission.Student_readMarks,
+    ]);
+    if (!permissions.student_readownmarks) {
         res.sendStatus(401);
         return;
     }
@@ -140,8 +147,10 @@ app.get("/students/getSubjects", async (req, res) => {
         subjects = await dbQuery(
             `SELECT su.name as name, su.subject_id as subject_id
                         FROM accounts.students s
-                        JOIN accounts.marks m ON m.student_id = s.user_id
-                        JOIN accounts.subjects su ON m.subject_id = su.subject_id
+                        JOIN accounts.students_classes sc ON sc.student_id = s.user_id
+                        JOIN accounts.classes c ON sc.class_id = c.class_id
+                        JOIN accounts.courses co on c.class_id = co.class_id
+                        JOIN accounts.subjects su on su.subject_id = co.subject_id
                         WHERE s.user_id=$1`,
             [accessToken.user_id],
         );
