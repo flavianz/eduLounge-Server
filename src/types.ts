@@ -14,7 +14,9 @@ export interface PersonalInfo {
     birth_date: string;
 }
 
-export type Permission = "readownmarks";
+export enum Permission {
+    Student_readMarks = "student_readownmarks",
+}
 
 export interface AccessTokenData extends RefreshTokenData {}
 
