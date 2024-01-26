@@ -43,6 +43,26 @@ app.head("/logout", (req, res) => {
     res.sendStatus(200);
 });
 
+app.post("/signup", async (req, res) => {
+    const { firstName, lastName, organizationName, password } = req.body;
+
+    if (!password) {
+        res.status(400).json({ message: "Missing password" });
+        return;
+    }
+    const isPasswordValid =
+        /^(?=(.*[a-z]){3,})(?=(.*[A-Z]){2,})(?=(.*[0-9]){2,})(?=(.*[!@#$%^&*()\-_+.])+).{8,}$/.test(
+            password,
+        );
+
+    if (!isPasswordValid) {
+        res.status(400).json({ message: "Invalid Password" });
+        return;
+    }
+
+    //create organization
+});
+
 app.post("/login", async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
