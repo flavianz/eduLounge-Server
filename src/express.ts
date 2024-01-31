@@ -11,7 +11,7 @@ import {
 } from "./jwt.js";
 import { dbQuery } from "./database/postgres.js";
 import { QueryResult } from "pg";
-import { decrypt } from "./database/crypto.js";
+import { decrypt, generateUUID } from "./database/crypto.js";
 import { Permission } from "./types.js";
 
 const { verify } = jwt;
@@ -44,9 +44,15 @@ app.head("/logout", (req, res) => {
 });
 
 app.post("/signup", async (req, res) => {
-    const { firstName, lastName, organizationName, password } = req.body;
+    const {
+        firstName,
+        lastName,
+        organizationName,
+        organizationShort,
+        password,
+    } = req.body;
 
-    if (!password) {
+    if (!password || !organizationShort) {
         res.status(400).json({ message: "Missing password" });
         return;
     }
@@ -59,8 +65,19 @@ app.post("/signup", async (req, res) => {
         res.status(400).json({ message: "Invalid Password" });
         return;
     }
-
+    const organizationID = generateUUID();
     //create organization
+    try {
+        await dbQuery(
+            "INSERT INTO accounts.organizations VALUES ($1, $2, $3)",
+            [organizationID, organizationShort, organizationName],
+        );
+    } catch (e) {
+        res.sendStatus(500);
+    }
+    try {
+        await dbQuery("INSERT INTO");
+    } catch (e) {}
 });
 
 app.post("/login", async (req, res) => {
