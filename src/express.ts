@@ -163,7 +163,13 @@ app.post("/students/marks", async (req, res) => {
     );
 });
 
-app.post("/users/createOrganization", async (req, res) => {});
+app.post("/users/createOrganization", async (req, res) => {
+    const {password, name} = req.body;
+    if(!(password && name))
+    {
+        res.sendStatus(406)
+    }
+});
 
 app.get("/students/subjects", async (req, res) => {
     const accessToken = checkAccessToken(req, res);
